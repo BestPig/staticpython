@@ -273,6 +273,14 @@ initbuilddir() {
     fi
   ) || return "$?"
 
+  if ! test "$UNAME" = Darwin; then
+    ( cd "$BUILDDIR" || return "$?"
+      mkdir -p upx || return "$?"
+      cd upx || return "$?"
+      tar xjvf ../../upx-3.91.inst.tbz2
+    ) || return "$?"
+  fi
+  
   cp -f "$BUILDDIR/config.guess.fake" "$BUILDDIR/config.guess"
 }
 
@@ -331,7 +339,7 @@ buildlibtc() {
     # TODO(pts): Check
     perl -pi~ -e 's@nanl\([^()]*\)@NAN@g' *.c || return "$?"  # There is no nanl(...) function in uClibc.
     ./configure --prefix=/dev/null/missing --disable-shared || return "$?"
-    perl -pi~ -e 's@\s-g(?!\S)@@g, s@\s-O\d*(?!\S)@ -O2@g if s@^CFLAGS\s*=@CFLAGS = @; s@ -I\S+@ @g, s@=@= -I.@ if s@^CPPFLAGS\s*=\s*@CPPFLAGS = @' Makefile || return "$?"
+    perl -pi~ -e 's@\s-g(?!\S)@@g, s@\s-O\d*(?!\S)@ -Os@g if s@^CFLAGS\s*=@CFLAGS = @; s@ -I\S+@ @g, s@=@= -I.@ if s@^CPPFLAGS\s*=\s*@CPPFLAGS = @' Makefile || return "$?"
     make libtokyocabinet.a || return "$?"
     $RANLIB libtokyocabinet.a || return "$?"
     cp libtokyocabinet.a ../build-lib/libtokyocabinet-staticpython.a || return "$?"
@@ -347,7 +355,7 @@ buildlibreadline() {
     tar xzvf ../readline-5.2.tar.gz || return "$?"
     cd readline-5.2 || return "$?"
     ./configure --disable-shared || return "$?"
-    perl -pi~ -e 's@\s-g(?!\S)@@g, s@\s-O\d*(?!\S)@ -O2@g if s@^CFLAGS\s*=@CFLAGS = @' Makefile || return "$?"
+    perl -pi~ -e 's@\s-g(?!\S)@@g, s@\s-O\d*(?!\S)@ -Os@g if s@^CFLAGS\s*=@CFLAGS = @' Makefile || return "$?"
     make || return "$?"
     # We could copy history.a, but Python doesn't need it.
     cp libreadline.a ../build-lib/libreadline-staticpython.a || return "$?"
@@ -362,7 +370,7 @@ buildlibsqlite3() {
     rm -rf sqlite-amalgamation-3070603 || return "$?"
     unzip ../sqlite-amalgamation-3070603.zip || return "$?"
     cd sqlite-amalgamation-3070603 || return "$?"
-    $CC -c -O2 -DSQLITE_ENABLE_STAT2 -DSQLITE_ENABLE_FTS3 -DSQLITE_ENABLE_FTS4 -DSQLITE_ENABLE_RTREE -W -Wall sqlite3.c || return "$?"
+    $CC -c -Os -DSQLITE_ENABLE_STAT2 -DSQLITE_ENABLE_FTS3 -DSQLITE_ENABLE_FTS4 -DSQLITE_ENABLE_RTREE -W -Wall sqlite3.c || return "$?"
     $AR cr libsqlite3.a sqlite3.o || return "$?"
     $RANLIB libsqlite3.a || return "$?"
     cp libsqlite3.a ../build-lib/libsqlite3-staticpython.a || return "$?"
@@ -395,7 +403,7 @@ buildlibssl() {
       # This inserts `-arch i386', which we remove below.
       ./Configure no-shared darwin-i386-cc || return "$?"  # TODO(pts): Test this.
     fi
-    perl -pi~ -e 's@\s(?:-g|-arch\s+\S+)(?!\S)@@g, s@\s-O\d*(?!\S)@ -O2@g, s@\s-D(DSO_DLFCN|HAVE_DLFCN_H)(?!\S)@@g if s@^CFLAG\s*=\s*@CFLAG = @' Makefile || return "$?"
+    perl -pi~ -e 's@\s(?:-g|-arch\s+\S+)(?!\S)@@g, s@\s-O\d*(?!\S)@ -Os@g, s@\s-D(DSO_DLFCN|HAVE_DLFCN_H)(?!\S)@@g if s@^CFLAG\s*=\s*@CFLAG = @' Makefile || return "$?"
     make build_libs || return "$?"
     cp libssl.a ../build-lib/libssl-staticpython.a || return "$?"
     cp libcrypto.a ../build-lib/libcrypto-staticpython.a || return "$?"
@@ -423,7 +431,7 @@ buildlibevent2() {
       grep '^#define HAVE_OPENSSL 1$' config.h || return "$?"
     fi
     cp -f ../config.guess.fake config.guess
-    perl -pi~ -e 's@\s-g(?!\S)@@g, s@\s-O\d*(?!\S)@ -O2@g if s@^CFLAGS\s*=@CFLAGS = @' Makefile */Makefile || return "$?"
+    perl -pi~ -e 's@\s-g(?!\S)@@g, s@\s-O\d*(?!\S)@ -Os@g if s@^CFLAGS\s*=@CFLAGS = @' Makefile */Makefile || return "$?"
     make ./include/event2/event-config.h libevent_core.la libevent.la || return "$?"
     $AR cr  libevent_evhttp.a bufferevent_sock.o http.o listener.o || return "$?"
     $RANLIB libevent_evhttp.a || return "$?"
@@ -481,10 +489,10 @@ fixmakefile() {
     # /System//Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation
     # .
     perl -pi~ -e 's@\s-(?:ldl|framework\s+CoreFoundation)(?!\S)@@g if s@^LIBS\s*=@LIBS = @' Makefile || return "$?"
-    # Remove -O... and -g from CFLAGS and OPT, and add -O2 to OPT. Please note
+    # Remove -O... and -g from CFLAGS and OPT, and add -Os to OPT. Please note
     # that Python 3.2 doesn't have CFLAGS at all.
-    perl -pi~ -e 's@\s-(?:g|O\d*)(?!\S)@@g, s@$@ -O2@ if s@^OPT\s*=@OPT = @' Makefile || return "$?"
-    perl -pi~ -e 's@\s-(?:g|O\d*)(?!\S)@@g, s@$@ -O2@ if s@^SLPFLAGS\s*=@SLPFLAGS = @' Makefile || return "$?"
+    perl -pi~ -e 's@\s-(?:g|O\d*)(?!\S)@@g, s@$@ -Os@ if s@^OPT\s*=@OPT = @' Makefile || return "$?"
+    perl -pi~ -e 's@\s-(?:g|O\d*)(?!\S)@@g, s@$@ -Os@ if s@^SLPFLAGS\s*=@SLPFLAGS = @' Makefile || return "$?"
     perl -pi~ -e 's@\s-g(?!\S)@@g, s@\s-O\d*(?!\S)@@g if s@^CFLAGS\s*=@CFLAGS = @' Makefile || return "$?"
     if test "$IS_PY3"; then
       if ! grep '@SLPFLAGS@' Makefile; then
@@ -492,9 +500,9 @@ fixmakefile() {
       elif test "$UNAME" = Darwin; then
         # Fix for Stackless 3.2.
         # TODO(pts): Run all Stackless test to verify this.
-        perl -pi~ -e 's~\@SLPFLAGS\@~-fomit-frame-pointer -DSTACKLESS_FRHACK=1 -O2~g' Makefile || return "$?"
+        perl -pi~ -e 's~\@SLPFLAGS\@~-fomit-frame-pointer -DSTACKLESS_FRHACK=1 -Os~g' Makefile || return "$?"
       else
-        perl -pi~ -e 's~\@SLPFLAGS\@~-fno-omit-frame-pointer -O2~g' Makefile || return "$?"
+        perl -pi~ -e 's~\@SLPFLAGS\@~-fno-omit-frame-pointer -Os~g' Makefile || return "$?"
       fi
     fi
   ) || return "$?"
@@ -1027,13 +1035,16 @@ for my $fn (@ARGV) {
 
 buildtarget() {
   cp "$BUILDDIR"/python.exe "$BUILDDIR/$TARGET" || return "$?"
-  $STRIP "$BUILDDIR/$TARGET" || return "$?"
+  $STRIP -s "$BUILDDIR/$TARGET" || return "$?"
   if test "$UNAME" = Linux; then
     do_elfosfix "$BUILDDIR/$TARGET" || return "$?"
   fi
+  if [ -f "./python2.7-static.build/upx/upx-3.91-i386_linux/upx" ]; then
+    "$BUILDDIR/upx/upx-3.91-i386_linux/upx" --ultra-brute $BUILDDIR/$TARGET || return "$?"
+  fi
   cat "$BUILDDIR"/xlib.zip >>"$BUILDDIR/$TARGET" || return "$?"
   cp "$BUILDDIR/$TARGET" "$TARGET" || return "$?"
-  ls -l "$TARGET" || return "$?"
+  ls -lh "$TARGET" || return "$?"
 }
 
 betry() {

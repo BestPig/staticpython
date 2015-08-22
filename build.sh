@@ -960,6 +960,56 @@ buildpythonlibzip() {
            xlib/site-packages* xlib/sqlite3/test/* xlib/turtle* xlib/tkinter \
            xlib/bsddb/test \
            xlib/test xlib/*.egg-info || return "$?"
+    # remove useless files for pwnpig linux live
+    rm -rf xlib/BaseHTTPServer.py xlib/Bastion.py xlib/CGIHTTPServer.py xlib/ConfigParser.py \
+          xlib/Cookie.py xlib/DocXMLRPCServer.py xlib/HTMLParser.py xlib/MimeWriter.py \
+          xlib/Queue.py xlib/SimpleHTTPServer.py xlib/SimpleXMLRPCServer.py \
+          xlib/SocketServer.py xlib/StringIO.py xlib/UserList.py xlib/UserString.py \
+          xlib/_LWPCookieJar.py xlib/_MozillaCookieJar.py xlib/__future__.py \
+          xlib/__phello__.foo.py xlib/_pyio.py xlib/_strptime.py xlib/_threading_local.py \
+          xlib/aifc.py xlib/antigravity.py xlib/anydbm.py xlib/argparse.py xlib/ast.py \
+          xlib/asynchat.py xlib/asyncore.py xlib/atexit.py xlib/audiodev.py xlib/base64.py \
+          xlib/bdb.py xlib/binhex.py xlib/bsddb xlib/cProfile.py xlib/calendar.py \
+	xlib/cgi.py xlib/cgitb.py xlib/chunk.py xlib/cmd.py xlib/code.py xlib/codecs.py \
+	xlib/codeop.py xlib/colorsys.py xlib/commands.py xlib/compileall.py \
+	xlib/compiler xlib/contextlib.py xlib/cookielib.py xlib/copy.py xlib/csv.py \
+	xlib/ctypes xlib/curses xlib/dbhash.py xlib/decimal.py xlib/difflib.py \
+	xlib/dircache.py xlib/dis.py xlib/distutils xlib/doctest.py xlib/dumbdbm.py \
+	xlib/dummy_thread.py xlib/dummy_threading.py xlib/email xlib/encodings \
+	xlib/filecmp.py xlib/fileinput.py xlib/formatter.py xlib/fpformat.py \
+	xlib/fractions.py xlib/ftplib.py xlib/functools.py xlib/getopt.py \
+	xlib/getpass.py xlib/gettext.py xlib/glob.py xlib/gzip.py xlib/hashlib.py \
+	xlib/hmac.py xlib/hotshot xlib/htmlentitydefs.py xlib/htmllib.py xlib/httplib.py \
+	xlib/idlelib xlib/ihooks.py xlib/imaplib.py xlib/imghdr.py xlib/importlib \
+	xlib/imputil.py xlib/inspect.py xlib/io.py xlib/json xlib/lib-old xlib/lib-tk \
+	xlib/lib2to3 xlib/locale.py xlib/logging xlib/macpath.py xlib/macurl2path.py \
+	xlib/mailbox.py xlib/mailcap.py xlib/markupbase.py xlib/md5.py xlib/mhlib.py \
+	xlib/mimetools.py xlib/mimetypes.py xlib/mimify.py xlib/modulefinder.py \
+	xlib/msilib xlib/multifile.py xlib/multiprocessing xlib/mutex.py xlib/netrc.py \
+	xlib/new.py xlib/nntplib.py xlib/ntpath.py xlib/nturl2path.py xlib/numbers.py \
+	xlib/opcode.py xlib/optparse.py xlib/os2emxpath.py xlib/pdb.doc xlib/pdb.py \
+	xlib/pipes.py xlib/pkgutil.py xlib/plat-aix3 xlib/plat-aix4 xlib/plat-atheos \
+	xlib/plat-beos5 xlib/plat-darwin xlib/plat-freebsd4 xlib/plat-freebsd5 \
+	xlib/plat-freebsd6 xlib/plat-freebsd7 xlib/plat-freebsd8 xlib/plat-generic \
+	xlib/plat-irix5 xlib/plat-irix6 xlib/plat-linux2 xlib/plat-mac xlib/plat-netbsd1 \
+	xlib/plat-next3 xlib/plat-os2emx xlib/plat-riscos xlib/plat-sunos5 \
+	xlib/plat-unixware7 xlib/platform.py xlib/plistlib.py xlib/popen2.py \
+	xlib/poplib.py xlib/posixfile.py xlib/pprint.py xlib/profile.py xlib/pstats.py \
+	xlib/pty.py xlib/py_compile.py xlib/pyclbr.py xlib/pydoc.py xlib/pydoc_data \
+	xlib/quopri.py xlib/random.py xlib/repr.py xlib/rexec.py xlib/rfc822.py \
+	xlib/rlcompleter.py xlib/robotparser.py xlib/runpy.py xlib/sched.py xlib/sets.py \
+	xlib/sgmllib.py xlib/sha.py xlib/shelve.py xlib/shlex.py xlib/site-packages \
+	xlib/smtpd.py xlib/smtplib.py xlib/sndhdr.py xlib/socket.py xlib/sqlite3 \
+	xlib/ssl.py xlib/statvfs.py xlib/string.py xlib/stringold.py xlib/stringprep.py \
+	xlib/sunau.py xlib/sunaudio.py xlib/symbol.py xlib/symtable.py xlib/sysconfig.py \
+	xlib/tabnanny.py xlib/tarfile.py xlib/telnetlib.py xlib/tempfile.py xlib/test \
+	xlib/textwrap.py xlib/this.py xlib/threading.py xlib/timeit.py xlib/toaiff.py \
+	xlib/token.py xlib/tokenize.py xlib/trace.py xlib/tty.py xlib/unittest \
+	xlib/urllib.py xlib/urllib2.py xlib/urlparse.py xlib/user.py xlib/uu.py \
+	xlib/uuid.py xlib/wave.py xlib/weakref.py xlib/webbrowser.py xlib/whichdb.py \
+	xlib/wsgiref xlib/wsgiref.egg-info xlib/xdrlib.py xlib/xml xlib/xmllib.py \
+	xlib/xmlrpclib.py xlib/zipfile.py || return "$?"
+
     if test "$UNAME" = Darwin; then
       rm -rf xlib/plat-linux2 || return "$?"
     else

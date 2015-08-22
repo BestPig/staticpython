@@ -1077,9 +1077,11 @@ for STEP in $XSTEPS; do
   set -x
   # set -e (abort on error) has no effect in functions in busybox sh, so we
   # don't enable it.
-  if ! $STEP; then
+  $STEP
+  if ! $?; then
+    ERR_CODE=$?
     set +x
-    fail_step "$?" "$STEP" "$XSTEPS"
+    fail_step "$ERR_CODE" "$STEP" "$XSTEPS"
   fi
   set +x
 done
